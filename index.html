@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="fr" dir="ltr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="Kalimāt"/>
+<meta name="theme-color" content="#0d0f14"/>
+<meta name="description" content="100 mots les plus fréquents du Coran — 5 modes d'étude"/>
+<title>Kalimāt — Vocabulaire Coranique</title>
+<link rel="manifest" href="manifest.json"/>
+<link rel="apple-touch-icon" href="icon-192.png"/>
+<link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+:root{--bg:#0d0f14;--card:rgba(255,255,255,0.035);--border:rgba(200,169,110,0.12);--gold:#c8a96e;--cream:#f0e6d3;--muted:rgba(240,230,211,0.4)}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow-x:hidden}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--cream)}
+#app{min-height:100vh;min-height:100dvh;display:flex;justify-content:center;position:relative}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.fadeUp{animation:fadeUp .4s ease both}
+.cardFlipped .cardInner{transform:rotateY(180deg)}
+.cardInner{position:relative;width:100%;height:100%;transition:transform .5s cubic-bezier(.4,0,.2,1);transform-style:preserve-3d}
+.cardFace{position:absolute;inset:0;backface-visibility:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;border-radius:20px;background:linear-gradient(145deg,rgba(200,169,110,0.06),rgba(13,15,20,0.95));border:1px solid var(--border)}
+.cardBack{transform:rotateY(180deg)}
+button{font-family:'DM Sans',sans-serif}
+button:disabled{opacity:.45;cursor:default!important}
+input:focus{outline:none;border-color:var(--gold)!important}
+@media(hover:hover){button:hover:not(:disabled){filter:brightness(1.12)}}
+/* Safe area padding for iPhone notch */
+.wrap{padding-bottom:calc(32px + env(safe-area-inset-bottom,0px))}
+/* Scrollbar */
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:rgba(200,169,110,0.15);border-radius:2px}
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<!-- Geometric BG SVG -->
+<svg style="position:fixed;inset:0;width:100%;height:100%;z-index:0;opacity:0.025;pointer-events:none">
+<defs><pattern id="gp" width="80" height="80" patternUnits="userSpaceOnUse">
+<path d="M40 0L80 40L40 80L0 40Z" fill="none" stroke="#c8a96e" stroke-width=".5"/>
+<circle cx="40" cy="40" r="12" fill="none" stroke="#c8a96e" stroke-width=".3"/>
+</pattern></defs><rect width="100%" height="100%" fill="url(#gp)"/>
+</svg>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+//  KALIMĀT — Quran Vocabulary PWA
+//  100 most frequent Quran words, 5 study modes
+// ═══════════════════════════════════════════════════════════
+
+const LOTS=[
+{id:1,title:"Particules & bases",words:[
+{ar:"اللَّهُ",fr:"Allah (Dieu)"},{ar:"فِي",fr:"dans / en"},{ar:"مِنْ",fr:"de / parmi"},{ar:"عَلَىٰ",fr:"sur"},{ar:"إِلَىٰ",fr:"vers"},
+{ar:"مَا",fr:"ce que / ne…pas"},{ar:"لَا",fr:"non / ne…pas"},{ar:"إِنَّ",fr:"certes / en vérité"},{ar:"قَدْ",fr:"certes / déjà"},{ar:"إِلَّا",fr:"sauf / excepté"}]},
+{id:2,title:"Pronoms",words:[
+{ar:"هُوَ",fr:"il / lui"},{ar:"هُمْ",fr:"eux / ils"},{ar:"الَّذِي",fr:"celui qui (masc.)"},{ar:"الَّذِينَ",fr:"ceux qui (plur.)"},{ar:"الَّتِي",fr:"celle qui (fém.)"},
+{ar:"هِيَ",fr:"elle"},{ar:"أَنتُمْ",fr:"vous (pluriel)"},{ar:"نَحْنُ",fr:"nous"},{ar:"ذَٰلِكَ",fr:"cela / celui-là"},{ar:"هَٰذَا",fr:"ceci / celui-ci"}]},
+{id:3,title:"Noms divins",words:[
+{ar:"رَبٌّ",fr:"Seigneur"},{ar:"الرَّحْمَٰنُ",fr:"Le Tout Miséricordieux"},{ar:"الرَّحِيمُ",fr:"Le Très Miséricordieux"},{ar:"عَلِيمٌ",fr:"Omniscient / Savant"},{ar:"حَكِيمٌ",fr:"Sage"},
+{ar:"قَدِيرٌ",fr:"Puissant / Capable"},{ar:"سَمِيعٌ",fr:"Celui qui entend tout"},{ar:"بَصِيرٌ",fr:"Celui qui voit tout"},{ar:"غَفُورٌ",fr:"Très Pardonneur"},{ar:"عَزِيزٌ",fr:"Tout-Puissant"}]},
+{id:4,title:"Verbes (1)",words:[
+{ar:"قَالَ",fr:"il a dit"},{ar:"كَانَ",fr:"il était / il fut"},{ar:"عَلِمَ",fr:"il a su / savoir"},{ar:"جَعَلَ",fr:"il a fait / rendu"},{ar:"آمَنَ",fr:"il a cru / croire"},
+{ar:"أَنزَلَ",fr:"il a révélé / fait descendre"},{ar:"خَلَقَ",fr:"il a créé"},{ar:"جَاءَ",fr:"il est venu"},{ar:"أَرَادَ",fr:"il a voulu"},{ar:"رَأَىٰ",fr:"il a vu"}]},
+{id:5,title:"Verbes (2)",words:[
+{ar:"عَمِلَ",fr:"il a œuvré / fait"},{ar:"كَفَرَ",fr:"il a mécru"},{ar:"ظَلَمَ",fr:"il a été injuste"},{ar:"دَعَا",fr:"il a invoqué / appelé"},{ar:"هَدَىٰ",fr:"il a guidé"},
+{ar:"أَرْسَلَ",fr:"il a envoyé"},{ar:"ذَكَرَ",fr:"il a rappelé / mentionné"},{ar:"شَاءَ",fr:"il a voulu (volonté divine)"},{ar:"كَذَّبَ",fr:"il a démenti"},{ar:"تَابَ",fr:"il s'est repenti"}]},
+{id:6,title:"Noms (1)",words:[
+{ar:"نَاسٌ",fr:"les gens"},{ar:"أَرْضٌ",fr:"terre"},{ar:"سَمَاءٌ",fr:"ciel"},{ar:"يَوْمٌ",fr:"jour"},{ar:"كِتَابٌ",fr:"livre"},
+{ar:"آيَةٌ",fr:"signe / verset"},{ar:"قَوْمٌ",fr:"peuple"},{ar:"نَفْسٌ",fr:"âme / soi-même"},{ar:"قَلْبٌ",fr:"cœur"},{ar:"شَيْءٌ",fr:"chose"}]},
+{id:7,title:"Noms (2)",words:[
+{ar:"حَقٌّ",fr:"vérité / droit"},{ar:"نُورٌ",fr:"lumière"},{ar:"مَاءٌ",fr:"eau"},{ar:"نَارٌ",fr:"feu / Enfer"},{ar:"جَنَّةٌ",fr:"jardin / Paradis"},
+{ar:"عِلْمٌ",fr:"science / savoir"},{ar:"عَذَابٌ",fr:"châtiment"},{ar:"أَجْرٌ",fr:"récompense / salaire"},{ar:"رَحْمَةٌ",fr:"miséricorde"},{ar:"سَبِيلٌ",fr:"chemin / voie"}]},
+{id:8,title:"Foi & pratique",words:[
+{ar:"دِينٌ",fr:"religion"},{ar:"صَلَاةٌ",fr:"prière"},{ar:"إِيمَانٌ",fr:"foi"},{ar:"تَقْوَىٰ",fr:"piété / crainte d'Allah"},{ar:"صِرَاطٌ",fr:"voie droite"},
+{ar:"هُدًى",fr:"guidée / guidance"},{ar:"تَوْبَةٌ",fr:"repentir"},{ar:"ذَنْبٌ",fr:"péché"},{ar:"ظُلْمٌ",fr:"injustice"},{ar:"فِتْنَةٌ",fr:"épreuve / tentation"}]},
+{id:9,title:"Concepts clés",words:[
+{ar:"مَوْتٌ",fr:"mort"},{ar:"حَيَاةٌ",fr:"vie"},{ar:"دُنْيَا",fr:"bas monde / vie d'ici-bas"},{ar:"آخِرَةٌ",fr:"au-delà / vie dernière"},{ar:"رَسُولٌ",fr:"messager / envoyé"},
+{ar:"نَبِيٌّ",fr:"prophète"},{ar:"مَلَكٌ",fr:"ange"},{ar:"شَيْطَانٌ",fr:"diable / Satan"},{ar:"مُؤْمِنٌ",fr:"croyant"},{ar:"كَافِرٌ",fr:"mécréant"}]},
+{id:10,title:"Adjectifs & divers",words:[
+{ar:"عَظِيمٌ",fr:"immense / grandiose"},{ar:"كَبِيرٌ",fr:"grand"},{ar:"كَرِيمٌ",fr:"généreux / noble"},{ar:"مُبِينٌ",fr:"clair / évident"},{ar:"صَالِحٌ",fr:"pieux / vertueux"},
+{ar:"ثُمَّ",fr:"ensuite / puis"},{ar:"أَوْ",fr:"ou"},{ar:"بَلْ",fr:"plutôt / mais"},{ar:"لَعَلَّ",fr:"peut-être / afin que"},{ar:"كَيْفَ",fr:"comment"}]},
+];
+
+const ALL=LOTS.flatMap(l=>l.words);
+const shuf=a=>{const b=[...a];for(let i=b.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[b[i],b[j]]=[b[j],b[i]];}return b;};
+const norm=s=>s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^\w\s]/g,"").trim();
+const checkAns=(correct,given)=>{const c=norm(correct),g=norm(given),m=c.split("/")[0].trim();return g&&(c.includes(g)||g.includes(m));};
+
+// ═══════════════════════════════════════
+//  State
+// ═══════════════════════════════════════
+let state={
+  screen:"home",lot:null,dir:"ar-fr",stars:new Set(),
+  // Cartes
+  cCards:[],cIdx:0,cFlip:false,cKnown:0,cLearn:0,cDone:false,
+  // Apprendre
+  lQ:[],lIdx:0,lType:"mcq",lChoices:[],lTf:null,lPicked:null,lAns:false,lInput:"",lOk:0,lWrong:[],lRound:1,lTotal:0,
+  // Test
+  tQs:[],tAns:{},tSub:false,tScore:0,
+  // Match
+  mPairs:[],mSel:null,mMatched:new Set(),mWrong:null,mTime:0,mRun:false,mDone:false,
+  // Write
+  wQ:[],wIdx:0,wIn:"",wAns:false,wOk:false,wScore:0,wWrong:[],wRound:1,wDone:false,
+};
+let mTimer=null;
+const qK=()=>state.dir==="ar-fr"?"ar":"fr";
+const aK=()=>state.dir==="ar-fr"?"fr":"ar";
+const pool=()=>state.lot?LOTS.find(l=>l.id===state.lot).words:ALL;
+
+function setState(u){Object.assign(state,typeof u==="function"?u(state):u);render();}
+
+// ═══════════════════════════════════════
+//  Save/Load progress from localStorage
+// ═══════════════════════════════════════
+function saveProgress(){
+  try{
+    const d={stars:[...state.stars],dir:state.dir};
+    localStorage.setItem("kalimat_v1",JSON.stringify(d));
+  }catch(e){}
+}
+function loadProgress(){
+  try{
+    const d=JSON.parse(localStorage.getItem("kalimat_v1")||"{}");
+    if(d.stars)state.stars=new Set(d.stars);
+    if(d.dir)state.dir=d.dir;
+  }catch(e){}
+}
+
+// ═══════════════════════════════════════
+//  Mode initializers
+// ═══════════════════════════════════════
+function initCartes(w){setState({cCards:shuf(w),cIdx:0,cFlip:false,cKnown:0,cLearn:0,cDone:false,screen:"cartes"});}
+function initLearn(w){
+  const s=shuf(w),r=genLQ(s[0],w,0);
+  setState({lQ:s,lIdx:0,lOk:0,lWrong:[],lRound:1,lTotal:s.length,lAns:false,lPicked:null,lInput:"",
+    lType:r.type,lChoices:r.choices||[],lTf:r.stmt||null,screen:"apprendre"});
+}
+function genLQ(word,words,diff){
+  if(diff<0.4){const o=shuf(words.filter(x=>x.ar!==word.ar)).slice(0,3);return{type:"mcq",choices:shuf([...o,word])};}
+  if(diff<0.7){const t=Math.random()>0.5,f=shuf(words.filter(x=>x.ar!==word.ar))[0];return{type:"tf",stmt:t?word:{...word,[aK()]:f[aK()]},isTrue:t};}
+  return{type:"write"};
+}
+function initTest(w){
+  const s=shuf(w),qs=s.map((word,i)=>{
+    const p=i/s.length;
+    if(p<0.4){const o=shuf(w.filter(x=>x.ar!==word.ar)).slice(0,3);return{id:i,type:"mcq",word,choices:shuf([...o,word])};}
+    if(p<0.7){const t=Math.random()>0.5,f=shuf(w.filter(x=>x.ar!==word.ar))[0];return{id:i,type:"tf",word,stmt:t?word:{...word,[aK()]:f[aK()]},isTrue:t};}
+    return{id:i,type:"write",word};
+  });
+  setState({tQs:qs,tAns:{},tSub:false,tScore:0,screen:"test"});
+}
+function initMatch(w){
+  clearInterval(mTimer);
+  const sub=shuf(w).slice(0,Math.min(w.length,6)),items=[];
+  sub.forEach((word,i)=>{items.push({id:"q"+i,text:word[qK()],pid:i,side:"q"});items.push({id:"a"+i,text:word[aK()],pid:i,side:"a"});});
+  setState({mPairs:shuf(items),mSel:null,mMatched:new Set(),mWrong:null,mTime:0,mRun:true,mDone:false,screen:"match"});
+  mTimer=setInterval(()=>{state.mTime+=0.1;render();},100);
+}
+function initWrite(w){setState({wQ:shuf(w),wIdx:0,wIn:"",wAns:false,wOk:false,wScore:0,wWrong:[],wRound:1,wDone:false,screen:"ecrire"});}
+function openMode(mode,lotId){
+  state.lot=lotId;const w=lotId?LOTS.find(l=>l.id===lotId).words:ALL;
+  ({cartes:initCartes,apprendre:initLearn,test:initTest,match:initMatch,ecrire:initWrite})[mode](w);
+}
+function goHome(){clearInterval(mTimer);setState({screen:"home"});}
+
+// ═══════════════════════════════════════
+//  Render engine (vanilla DOM)
+// ═══════════════════════════════════════
+function h(tag,attrs,...children){
+  const el=document.createElement(tag);
+  if(attrs)Object.entries(attrs).forEach(([k,v])=>{
+    if(k==="style"&&typeof v==="object")Object.assign(el.style,v);
+    else if(k.startsWith("on"))el.addEventListener(k.slice(2).toLowerCase(),v);
+    else if(k==="className")el.className=v;
+    else if(k==="disabled"){if(v)el.setAttribute("disabled","");} 
+    else if(k==="placeholder")el.setAttribute("placeholder",v);
+    else if(k==="value")el.value=v;
+    else if(k==="autoFocus")setTimeout(()=>el.focus(),50);
+    else el.setAttribute(k,v);
+  });
+  children.flat(9).forEach(c=>{if(c!=null)el.append(typeof c==="object"?c:document.createTextNode(String(c)));});
+  return el;
+}
+
+function render(){
+  const app=document.getElementById("app");
+  const n=renderScreen();
+  app.innerHTML="";
+  app.append(n);
+}
+
+function renderScreen(){
+  const s=state;
+  const wrap=h("div",{style:{width:"100%",maxWidth:460,padding:"12px 14px 32px",paddingBottom:"calc(32px + env(safe-area-inset-bottom, 0px))",position:"relative",zIndex:1}});
+  wrap.className="wrap";
+
+  if(s.screen==="home")wrap.append(renderHome());
+  else if(s.screen==="cartes")wrap.append(renderCartes());
+  else if(s.screen==="apprendre")wrap.append(renderLearn());
+  else if(s.screen==="test")wrap.append(renderTest());
+  else if(s.screen==="match")wrap.append(renderMatch());
+  else if(s.screen==="ecrire")wrap.append(renderWrite());
+  else if(s.screen==="results")wrap.append(renderResults());
+  return wrap;
+}
+
+const qSt=()=>state.dir==="ar-fr"?{fontFamily:"'Amiri',serif",fontSize:"40px",direction:"rtl",lineHeight:"1.5",color:"var(--cream)",textAlign:"center"}
+  :{fontFamily:"'DM Sans',sans-serif",fontSize:"18px",color:"var(--cream)",textAlign:"center"};
+const aSt=()=>state.dir==="ar-fr"?{fontFamily:"'DM Sans',sans-serif",fontSize:"18px",color:"var(--cream)",textAlign:"center"}
+  :{fontFamily:"'Amiri',serif",fontSize:"34px",direction:"rtl",lineHeight:"1.5",color:"var(--cream)",textAlign:"center"};
+const arChoiceSt=()=>state.dir!=="ar-fr"?{fontFamily:"'Amiri',serif",fontSize:"22px",direction:"rtl"}:{};
+const arInputSt=()=>state.dir!=="ar-fr"?{direction:"rtl",fontFamily:"'Amiri',serif",fontSize:"22px"}:{};
+
+// Shared styles
+const S={
+  btn:"width:100%;padding:13px 20px;border:1px solid var(--border);border-radius:14px;background:var(--card);color:var(--cream);font-size:15px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:all .2s",
+  bGo:"border-color:var(--gold);background:rgba(200,169,110,0.1);color:var(--gold)",
+  bDim:"border-color:var(--border);color:var(--muted)",
+  bGr:"border-color:#4ade80;background:rgba(74,222,128,0.1);color:#4ade80",
+  bOr:"border-color:#f97316;background:rgba(249,115,22,0.1);color:#f97316",
+};
+
+function css(base,...extras){return base+";"+extras.join(";")}
+function btn(text,onclick,extra=""){
+  const b=h("button",{style:Object.assign({},...css(S.btn,extra).split(";").map(s=>{const[k,v]=s.split(":").map(x=>x.trim());return k&&v?{[k.replace(/-([a-z])/g,(_,l)=>l.toUpperCase())]:v}:{};}))},text);
+  if(onclick)b.addEventListener("click",onclick);return b;
+}
+
+function makeBtn(text,onClick,styles={}){
+  const base={width:"100%",padding:"13px 20px",border:"1px solid var(--border)",borderRadius:"14px",background:"var(--card)",color:"var(--cream)",fontSize:"15px",fontWeight:"600",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:"8px",transition:"all .2s"};
+  return h("button",{style:{...base,...styles},onClick},text);
+}
+function goldBtn(t,fn,s={}){return makeBtn(t,fn,{borderColor:"var(--gold)",background:"rgba(200,169,110,0.1)",color:"var(--gold)",...s});}
+function dimBtn(t,fn,s={}){return makeBtn(t,fn,{borderColor:"var(--border)",color:"var(--muted)",...s});}
+function greenBtn(t,fn,s={}){return makeBtn(t,fn,{borderColor:"#4ade80",background:"rgba(74,222,128,0.1)",color:"#4ade80",...s});}
+function orangeBtn(t,fn,s={}){return makeBtn(t,fn,{borderColor:"#f97316",background:"rgba(249,115,22,0.1)",color:"#f97316",...s});}
+
+function topBar(label,sub,progress){
+  return h("div",{style:{display:"flex",alignItems:"center",gap:"10px",width:"100%",marginBottom:"6px"}},
+    h("button",{style:{width:"36px",height:"36px",border:"1px solid var(--border)",borderRadius:"10px",background:"var(--card)",color:"var(--muted)",fontSize:"16px",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:"0"},onClick:goHome},"✕"),
+    h("div",{style:{flex:"1",minWidth:"0"}},
+      h("div",{style:{fontSize:"14px",fontWeight:"600",color:"var(--cream)",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}},label),
+      h("div",{style:{fontSize:"11px",color:"var(--muted)"}},sub),
+      h("div",{style:{width:"100%",height:"3px",borderRadius:"2px",background:"rgba(200,169,110,0.1)",marginTop:"3px"}},
+        h("div",{style:{height:"100%",borderRadius:"2px",background:"var(--gold)",transition:"width .4s ease",width:(progress*100)+"%"}}))
+    )
+  );
+}
+
+function doneScreen(emoji,title,sub,retryFn,label){
+  const d=h("div",{className:"fadeUp",style:{textAlign:"center",padding:"30px 0"}},
+    h("div",{style:{fontSize:"50px",marginBottom:"10px"}},emoji),
+    h("div",{style:{fontSize:"22px",fontWeight:"700",color:"var(--cream)"}},title),
+    h("div",{style:{color:"var(--muted)",fontSize:"14px",marginTop:"4px"}},sub),
+    h("div",{style:{display:"flex",gap:"10px",marginTop:"24px"}},
+      goldBtn("Recommencer",retryFn,{flex:"1"}),
+      dimBtn("Accueil",goHome,{flex:"1"})
+    )
+  );
+  return d;
+}
+
+// ═══════════════════════════════════════
+//  HOME
+// ═══════════════════════════════════════
+function renderHome(){
+  const s=state,d=h("div",{className:"fadeUp",style:{display:"flex",flexDirection:"column",gap:"18px"}});
+  // Header
+  d.append(h("div",{style:{textAlign:"center",padding:"6px 0 0"}},
+    h("div",{style:{fontSize:"11px",letterSpacing:"3px",color:"var(--gold)",textTransform:"uppercase",fontWeight:"500"}},"Vocabulaire Coranique"),
+    h("h1",{style:{fontFamily:"'Amiri',serif",fontSize:"42px",color:"var(--cream)",margin:"2px 0",lineHeight:"1.2"}},"كَلِمَات"),
+    h("p",{style:{color:"var(--muted)",fontSize:"13px",margin:"0"}},"100 mots · 10 lots · 5 modes d'étude")
+  ));
+  // Toggle
+  const togRow=h("div",{style:{display:"flex",background:"var(--card)",borderRadius:"12px",padding:"3px",border:"1px solid var(--border)"}});
+  ["ar-fr","fr-ar"].forEach(d2=>{
+    const active=s.dir===d2;
+    togRow.append(h("button",{style:{flex:"1",padding:"9px 0",border:"none",borderRadius:"10px",background:active?"rgba(200,169,110,0.12)":"transparent",color:active?"var(--gold)":"var(--muted)",fontSize:"14px",fontWeight:"500",cursor:"pointer",transition:"all .2s"},onClick:()=>{setState({dir:d2});saveProgress();}},d2==="ar-fr"?"عربي → FR":"FR → عربي"));
+  });
+  d.append(togRow);
+  // Mode buttons
+  const grid=h("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"8px"}});
+  [{m:"cartes",i:"📇",l:"Cartes",span:true},{m:"apprendre",i:"🧠",l:"Apprendre"},{m:"test",i:"📝",l:"Test"},{m:"match",i:"🔗",l:"Associer"},{m:"ecrire",i:"✍️",l:"Écrire"}].forEach(({m,i,l,span})=>{
+    const b=h("button",{style:{padding:"13px 16px",border:"1px solid var(--border)",borderRadius:"14px",background:"var(--card)",color:"var(--cream)",fontSize:"15px",fontWeight:"600",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:"8px",transition:"all .2s",...(span?{gridColumn:"1/3"}:{})},onClick:()=>openMode(m,null)},
+      h("span",{style:{fontSize:"20px"}},i),l);
+    if(span)b.append(h("span",{style:{fontSize:"12px",color:"var(--muted)",marginLeft:"4px"}},"(100)"));
+    grid.append(b);
+  });
+  d.append(grid);
+  // Separator
+  d.append(h("div",{style:{display:"flex",alignItems:"center",gap:"12px",margin:"2px 0"}},
+    h("div",{style:{flex:"1",height:"1px",background:"var(--border)"}}),
+    h("span",{style:{color:"var(--muted)",fontSize:"11px",letterSpacing:"2px",textTransform:"uppercase"}},"Par lot de 10"),
+    h("div",{style:{flex:"1",height:"1px",background:"var(--border)"}})
+  ));
+  // Lots
+  LOTS.forEach((lot,idx)=>{
+    const card=h("div",{className:"fadeUp",style:{display:"flex",alignItems:"center",gap:"10px",padding:"12px",borderRadius:"14px",background:"var(--card)",border:"1px solid var(--border)",animationDelay:(idx*0.03)+"s"}},
+      h("div",{style:{flex:"1",minWidth:"0"}},
+        h("div",{style:{fontSize:"14px",fontWeight:"600",color:"var(--cream)"}},"Lot "+lot.id+" — "+lot.title),
+        h("div",{style:{fontSize:"12px",color:"var(--muted)",marginTop:"2px"}},lot.words.slice(0,3).map(w=>w.ar).join(" · ")+" …")
+      ),
+      h("div",{style:{display:"flex",gap:"4px",flexShrink:"0"}},
+        ...[["cartes","📇"],["apprendre","🧠"],["test","📝"],["match","🔗"],["ecrire","✍️"]].map(([m,ic])=>
+          h("button",{style:{width:"30px",height:"30px",border:"1px solid var(--border)",borderRadius:"8px",background:"rgba(255,255,255,0.02)",fontSize:"13px",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center"},onClick:()=>openMode(m,lot.id),title:m},ic)
+        )
+      )
+    );
+    d.append(card);
+  });
+  return d;
+}
+
+// ═══════════════════════════════════════
+//  CARTES
+// ═══════════════════════════════════════
+function renderCartes(){
+  const s=state,d=h("div",{className:"fadeUp",style:{display:"flex",flexDirection:"column",gap:"14px",alignItems:"center"}});
+  d.append(topBar("Cartes"+(s.lot?" · Lot "+s.lot:""),s.cDone?"Terminé":(s.cIdx+1)+"/"+s.cCards.length,(s.cIdx+(s.cDone?1:0))/s.cCards.length));
+  if(!s.cDone){
+    // Stats
+    d.append(h("div",{style:{display:"flex",gap:"20px",justifyContent:"center"}},
+      h("div",{style:{textAlign:"center"}},h("div",{style:{fontSize:"22px",fontWeight:"700",color:"#4ade80"}},s.cKnown),h("div",{style:{fontSize:"11px",color:"var(--muted)"}},"Acquis")),
+      h("div",{style:{textAlign:"center"}},h("div",{style:{fontSize:"22px",fontWeight:"700",color:"#f97316"}},s.cLearn),h("div",{style:{fontSize:"11px",color:"var(--muted)"}},"À revoir"))
+    ));
+    // Card
+    const card=h("div",{style:{width:"100%",maxWidth:"340px",height:"240px",perspective:"1000px",cursor:"pointer",WebkitTapHighlightColor:"transparent"},onClick:()=>setState({cFlip:!s.cFlip})});
+    card.className=s.cFlip?"cardFlipped":"";
+    const inner=h("div",null);inner.className="cardInner";
+    const word=s.cCards[s.cIdx];
+    // Front
+    const front=h("div",null,
+      h("button",{style:{position:"absolute",top:"12px",right:"12px",background:"none",border:"none",fontSize:"22px",color:"var(--gold)",cursor:"pointer",zIndex:"2"},onClick:e=>{e.stopPropagation();s.stars.has(word.ar)?s.stars.delete(word.ar):s.stars.add(word.ar);saveProgress();render();}},s.stars.has(word.ar)?"★":"☆"),
+      h("div",{style:{fontSize:"11px",color:"var(--gold)",letterSpacing:"2px",textTransform:"uppercase",marginBottom:"6px"}},s.dir==="ar-fr"?"Arabe":"Français"),
+      h("div",{style:qSt()},word[qK()]),
+      h("div",{style:{fontSize:"12px",color:"var(--muted)",marginTop:"14px"}},"Touche pour retourner")
+    );front.className="cardFace cardFront";
+    const back=h("div",null,
+      h("div",{style:{fontSize:"11px",color:"var(--gold)",letterSpacing:"2px",textTransform:"uppercase",marginBottom:"6px"}},s.dir==="ar-fr"?"Français":"Arabe"),
+      h("div",{style:aSt()},word[aK()])
+    );back.className="cardFace cardBack";
+    inner.append(front,back);card.append(inner);d.append(card);
+    // Buttons
+    if(s.cFlip){
+      d.append(h("div",{className:"fadeUp",style:{display:"flex",gap:"10px",width:"100%",maxWidth:"360px"}},
+        orangeBtn("À revoir 🔄",()=>{s.cLearn++;s.cFlip=false;setTimeout(()=>{if(s.cIdx+1<s.cCards.length)s.cIdx++;else s.cDone=true;render();},180);render();},{flex:"1"}),
+        greenBtn("Acquis ✓",()=>{s.cKnown++;s.cFlip=false;setTimeout(()=>{if(s.cIdx+1<s.cCards.length)s.cIdx++;else s.cDone=true;render();},180);render();},{flex:"1"})
+      ));
+    }
+  } else {
+    d.append(doneScreen(s.cKnown>=s.cCards.length*0.8?"🌟":"💪",s.cKnown+"/"+s.cCards.length+" acquis",s.cLearn+" à revoir",()=>initCartes(pool())));
+  }
+  return d;
+}
+
+// ═══════════════════════════════════════
+//  APPRENDRE
+// ═══════════════════════════════════════
+function renderLearn(){
+  const s=state,d=h("div",{className:"fadeUp",style:{display:"flex",flexDirection:"column",gap:"14px"}});
+  d.append(topBar("Apprendre"+(s.lot?" · Lot "+s.lot:""),"Tour "+s.lRound+" · "+(s.lIdx+1)+"/"+s.lQ.length,(s.lIdx+1)/s.lQ.length));
+  d.append(h("div",{style:{display:"flex",gap:"16px",justifyContent:"center"}},
+    h("span",{style:{fontSize:"13px",color:"#4ade80"}},"✓ "+s.lOk),
+    h("span",{style:{fontSize:"12px",padding:"2px 10px",borderRadius:"20px",background:"rgba(200,169,110,0.1)",color:"var(--gold)"}},s.lType==="mcq"?"QCM":s.lType==="tf"?"Vrai/Faux":"Écrit")
+  ));
+  const word=s.lQ[s.lIdx];
+  // Question
+  const qc=h("div",{style:{padding:"22px 18px",borderRadius:"16px",background:"var(--card)",border:"1px solid var(--border)",textAlign:"center"}},h("div",{style:qSt()},word[qK()]));
+  if(s.lType==="tf")qc.append(h("div",{style:{marginTop:"8px",fontSize:"16px",color:"var(--gold)"}},"= "+s.lTf[aK()]+" ?"));
+  d.append(qc);
+
+  if(s.lType==="mcq"){
+    const cDiv=h("div",{style:{display:"flex",flexDirection:"column",gap:"8px"}});
+    s.lChoices.forEach(c=>{
+      const isOk=c.ar===word.ar,isP=s.lPicked?.ar===c.ar;
+      let bg="var(--card)",bd="var(--border)",cl="var(--cream)";
+      if(s.lAns){if(isOk){bg="rgba(74,222,128,0.1)";bd="#4ade80";cl="#4ade80";}else if(isP){bg="rgba(239,68,68,0.1)";bd="#ef4444";cl="#ef4444";}}
+      cDiv.append(h("button",{style:{width:"100%",padding:"14px 16px",border:"1px solid "+bd,borderRadius:"14px",background:bg,fontSize:"15px",fontWeight:"500",textAlign:"center",cursor:s.lAns?"default":"pointer",display:"flex",alignItems:"center",justifyContent:"center",transition:"all .2s",color:cl,...arChoiceSt()},disabled:s.lAns,onClick:()=>{if(!s.lAns){s.lPicked=c;s.lAns=true;if(isOk)s.lOk++;else s.lWrong.push(word);render();}}},c[aK()]+(s.lAns&&isOk?" ✓":"")+(s.lAns&&isP&&!isOk?" ✗":"")));
+    });
+    d.append(cDiv);
+  }
+
+  if(s.lType==="tf"&&!s.lAns){
+    d.append(h("div",{style:{display:"flex",gap:"10px"}},
+      greenBtn("Vrai",()=>{s.lPicked=true;s.lAns=true;const ok=s.lTf?.ar===word.ar;if(ok)s.lOk++;else s.lWrong.push(word);render();}),
+      orangeBtn("Faux",()=>{s.lPicked=false;s.lAns=true;const ok=s.lTf?.ar!==word.ar;if(ok)s.lOk++;else s.lWrong.push(word);render();})
+    ));
+  }
+  if(s.lType==="tf"&&s.lAns){
+    d.append(h("div",{style:{textAlign:"center",padding:"12px",borderRadius:"12px",background:"rgba(200,169,110,0.06)",border:"1px solid var(--border)"}},"Réponse : ",h("strong",{style:{color:"var(--gold)"}},word[aK()])));
+  }
+
+  if(s.lType==="write"){
+    const inp=h("input",{style:{width:"100%",padding:"13px 16px",border:"1px solid var(--border)",borderRadius:"14px",background:"rgba(255,255,255,0.03)",color:"var(--cream)",fontSize:"16px",...arInputSt()},placeholder:s.dir==="ar-fr"?"Écris la traduction…":"اكتب الترجمة…",disabled:s.lAns,value:s.lInput,autoFocus:true});
+    inp.addEventListener("input",e=>{s.lInput=e.target.value;});
+    inp.addEventListener("keydown",e=>{if(e.key==="Enter"&&!s.lAns&&s.lInput.trim()){s.lAns=true;if(checkAns(word[aK()],s.lInput))s.lOk++;else s.lWrong.push(word);render();}});
+    d.append(inp);
+    if(!s.lAns){d.append(goldBtn("Valider",()=>{if(!s.lInput.trim())return;s.lAns=true;if(checkAns(word[aK()],s.lInput))s.lOk++;else s.lWrong.push(word);render();}));}
+    if(s.lAns){d.append(h("div",{style:{marginTop:"8px",padding:"12px",borderRadius:"14px",background:"rgba(200,169,110,0.06)",border:"1px solid var(--border)"}},h("div",{style:{fontSize:"12px",color:"var(--muted)"}},"Réponse :"),h("div",{style:{...aSt(),fontSize:s.dir!=="ar-fr"?"26px":"16px",marginTop:"4px"}},word[aK()])));}
+  }
+
+  if(s.lAns){
+    d.append(goldBtn("Suivant →",()=>{
+      const w=pool();
+      if(s.lIdx+1<s.lQ.length){s.lIdx++;const r=genLQ(s.lQ[s.lIdx],w,Math.min((s.lRound-1)*0.35,0.85));Object.assign(s,{lType:r.type,lChoices:r.choices||[],lTf:r.stmt||null,lAns:false,lPicked:null,lInput:""});}
+      else if(s.lWrong.length>0){const nq=shuf(s.lWrong);s.lQ=nq;s.lIdx=0;s.lWrong=[];s.lRound++;const r=genLQ(nq[0],w,Math.min((s.lRound-1)*0.35,0.85));Object.assign(s,{lType:r.type,lChoices:r.choices||[],lTf:r.stmt||null,lAns:false,lPicked:null,lInput:""});}
+      else{setState({screen:"results"});}
+      render();
+    }));
+  }
+  return d;
+}
+
+// ═══════════════════════════════════════
+//  TEST
+// ═══════════════════════════════════════
+function renderTest(){
+  const s=state,d=h("div",{className:"fadeUp",style:{display:"flex",flexDirection:"column",gap:"14px"}});
+  d.append(topBar("Test"+(s.lot?" · Lot "+s.lot:""),s.tQs.length+" questions",s.tSub?1:Object.keys(s.tAns).length/s.tQs.length));
+
+  if(s.tSub){
+    d.append(h("div",{className:"fadeUp",style:{textAlign:"center",padding:"16px",background:"var(--card)",borderRadius:"16px",border:"1px solid var(--border)"}},
+      h("div",{style:{fontSize:"42px",marginBottom:"4px"}},s.tScore>=s.tQs.length*0.8?"🌟":s.tScore>=s.tQs.length*0.5?"👏":"💪"),
+      h("div",{style:{fontSize:"28px",fontWeight:"700",color:"var(--cream)"}},s.tScore+"/"+s.tQs.length),
+      h("div",{style:{color:"var(--muted)",fontSize:"14px"}},Math.round(s.tScore/s.tQs.length*100)+"%")
+    ));
+  }
+
+  s.tQs.forEach((tq,i)=>{
+    const isOk=s.tSub&&((tq.type==="mcq"&&s.tAns[tq.id]===tq.word.ar)||(tq.type==="tf"&&s.tAns[tq.id]===tq.isTrue)||(tq.type==="write"&&checkAns(tq.word[aK()],s.tAns[tq.id]||"")));
+    const qDiv=h("div",{style:{padding:"16px 14px",borderRadius:"16px",background:s.tSub?(isOk?"rgba(74,222,128,0.04)":"rgba(239,68,68,0.04)"):"var(--card)",border:"1px solid "+(s.tSub?(isOk?"#4ade80":"#ef4444"):"var(--border)"),transition:"all .3s"}});
+    qDiv.append(h("div",{style:{display:"flex",justifyContent:"space-between",marginBottom:"6px"}},
+      h("span",{style:{fontSize:"11px",color:"var(--gold)",letterSpacing:"1px"}},(tq.type==="mcq"?"QCM":tq.type==="tf"?"VRAI/FAUX":"ÉCRIT")+" · Q"+(i+1)),
+      s.tSub?h("span",{style:{fontSize:"14px",color:isOk?"#4ade80":"#ef4444"}},isOk?"✓":"✗"):""
+    ));
+    qDiv.append(h("div",{style:{...qSt(),fontSize:s.dir==="ar-fr"?"30px":"16px",marginBottom:"10px"}},tq.word[qK()]));
+
+    if(tq.type==="mcq"){
+      const cc=h("div",{style:{display:"flex",flexDirection:"column",gap:"6px"}});
+      tq.choices.forEach(c=>{
+        const sel=s.tAns[tq.id]===c.ar,cor=c.ar===tq.word.ar;
+        let st={width:"100%",padding:"10px 12px",border:"1px solid var(--border)",borderRadius:"10px",background:"var(--card)",fontSize:"14px",textAlign:"center",cursor:s.tSub?"default":"pointer",color:"var(--cream)",transition:"all .2s",...arChoiceSt()};
+        if(s.tSub&&cor)Object.assign(st,{borderColor:"#4ade80",color:"#4ade80"});
+        else if(s.tSub&&sel&&!cor)Object.assign(st,{borderColor:"#ef4444",color:"#ef4444"});
+        else if(sel)Object.assign(st,{borderColor:"var(--gold)",background:"rgba(200,169,110,0.08)"});
+        cc.append(h("button",{style:st,disabled:s.tSub,onClick:()=>{s.tAns[tq.id]=c.ar;render();}},c[aK()]));
+      });
+      qDiv.append(cc);
+    }
+    if(tq.type==="tf"){
+      qDiv.append(h("div",{style:{textAlign:"center",marginBottom:"8px",fontSize:"15px",color:"var(--gold)"}},"= "+tq.stmt[aK()]+" ?"));
+      const r=h("div",{style:{display:"flex",gap:"8px"}});
+      [true,false].forEach(v=>{
+        const sel=s.tAns[tq.id]===v;
+        let st={flex:"1",padding:"10px 12px",border:"1px solid var(--border)",borderRadius:"10px",background:"var(--card)",fontSize:"14px",textAlign:"center",cursor:s.tSub?"default":"pointer",color:"var(--cream)",transition:"all .2s"};
+        if(s.tSub&&v===tq.isTrue)Object.assign(st,{borderColor:"#4ade80",color:"#4ade80"});
+        else if(s.tSub&&sel&&v!==tq.isTrue)Object.assign(st,{borderColor:"#ef4444",color:"#ef4444"});
+        else if(sel)Object.assign(st,{borderColor:"var(--gold)",background:"rgba(200,169,110,0.08)"});
+        r.append(h("button",{style:st,disabled:s.tSub,onClick:()=>{s.tAns[tq.id]=v;render();}},v?"Vrai":"Faux"));
+      });
+      qDiv.append(r);
+    }
+    if(tq.type==="write"){
+      const inp=h("input",{style:{width:"100%",padding:"13px 16px",border:"1px solid var(--border)",borderRadius:"14px",background:"rgba(255,255,255,0.03)",color:"var(--cream)",fontSize:"14px",...arInputSt()},placeholder:"Ta réponse…",disabled:s.tSub,value:s.tAns[tq.id]||""});
+      inp.addEventListener("input",e=>{s.tAns[tq.id]=e.target.value;});
+      qDiv.append(inp);
+      if(s.tSub&&!isOk)qDiv.append(h("div",{style:{fontSize:"13px",color:"#4ade80",marginTop:"4px"}},"Réponse : "+tq.word[aK()]));
+    }
+    d.append(qDiv);
+  });
+
+  if(!s.tSub){
+    d.append(goldBtn("Soumettre ("+Object.keys(s.tAns).length+"/"+s.tQs.length+")",()=>{
+      let sc=0;
+      s.tQs.forEach(tq=>{const a=s.tAns[tq.id];if(tq.type==="mcq"&&a===tq.word.ar)sc++;else if(tq.type==="tf"&&a===tq.isTrue)sc++;else if(tq.type==="write"&&checkAns(tq.word[aK()],a||""))sc++;});
+      setState({tScore:sc,tSub:true});window.scrollTo(0,0);
+    },{position:"sticky",bottom:"12px",zIndex:"10"}));
+  } else {
+    d.append(h("div",{style:{display:"flex",gap:"10px"}},goldBtn("Refaire",()=>initTest(pool()),{flex:"1"}),dimBtn("Accueil",goHome,{flex:"1"})));
+  }
+  return d;
+}
+
+// ═══════════════════════════════════════
+//  MATCH
+// ═══════════════════════════════════════
+function renderMatch(){
+  const s=state,d=h("div",{className:"fadeUp",style:{display:"flex",flexDirection:"column",gap:"14px",alignItems:"center"}});
+  d.append(topBar("Associer",s.mDone?"Terminé":"Trouve les paires",s.mMatched.size/(s.mPairs.length/2)));
+  d.append(h("div",{style:{fontSize:"30px",fontWeight:"700",color:"var(--cream)",fontVariantNumeric:"tabular-nums"}},s.mTime.toFixed(1)+"s"));
+
+  if(!s.mDone){
+    const grid=h("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"8px",width:"100%"}});
+    s.mPairs.forEach(item=>{
+      const mt=s.mMatched.has(item.pid),sel=s.mSel?.id===item.id,wr=s.mWrong?.includes(item.id);
+      const isAr=(s.dir==="ar-fr"&&item.side==="q")||(s.dir!=="ar-fr"&&item.side==="a");
+      grid.append(h("button",{style:{padding:"14px 8px",borderRadius:"14px",border:"1px solid "+(wr?"#ef4444":sel?"var(--gold)":"var(--border)"),background:wr?"rgba(239,68,68,0.1)":sel?"rgba(200,169,110,0.1)":"var(--card)",color:"var(--cream)",fontWeight:"500",cursor:mt?"default":"pointer",textAlign:"center",transition:"all .25s ease",minHeight:"52px",display:"flex",alignItems:"center",justifyContent:"center",opacity:mt?"0.15":"1",transform:mt?"scale(0.9)":"scale(1)",...(isAr?{fontFamily:"'Amiri',serif",fontSize:"22px",direction:"rtl"}:{fontSize:"13px"})},disabled:mt,onClick:()=>{
+        if(mt||s.mDone||s.mWrong)return;
+        if(!s.mSel){s.mSel=item;render();return;}
+        if(s.mSel.id===item.id){s.mSel=null;render();return;}
+        if(s.mSel.side===item.side){s.mSel=item;render();return;}
+        if(s.mSel.pid===item.pid){s.mMatched.add(item.pid);s.mSel=null;if(s.mMatched.size===s.mPairs.length/2){clearInterval(mTimer);s.mRun=false;s.mDone=true;}}
+        else{s.mWrong=[s.mSel.id,item.id];setTimeout(()=>{s.mWrong=null;s.mSel=null;render();},500);}
+        render();
+      }},item.text));
+    });
+    d.append(grid);
+  } else {
+    d.append(doneScreen("🎯",s.mTime<15?"Excellent !":s.mTime<25?"Bien joué !":"Continue !","Temps : "+s.mTime.toFixed(1)+"s",()=>initMatch(pool())));
+  }
+  return d;
+}
+
+// ═══════════════════════════════════════
+//  ÉCRIRE
+// ═══════════════════════════════════════
+function renderWrite(){
+  const s=state,d=h("div",{className:"fadeUp",style:{display:"flex",flexDirection:"column",gap:"14px"}});
+  d.append(topBar("Écrire"+(s.lot?" · Lot "+s.lot:""),s.wDone?"Terminé":"Tour "+s.wRound+" · "+(s.wIdx+1)+"/"+s.wQ.length,(s.wIdx+(s.wAns?1:0))/s.wQ.length));
+
+  if(!s.wDone){
+    const word=s.wQ[s.wIdx];
+    d.append(h("div",{style:{padding:"22px 18px",borderRadius:"16px",background:"var(--card)",border:"1px solid var(--border)",textAlign:"center"}},h("div",{style:qSt()},word[qK()])));
+
+    const inp=h("input",{style:{width:"100%",padding:"13px 16px",border:"1px solid var(--border)",borderRadius:"14px",background:"rgba(255,255,255,0.03)",color:"var(--cream)",fontSize:"16px",...arInputSt()},placeholder:s.dir==="ar-fr"?"Écris en français…":"اكتب بالعربية…",disabled:s.wAns,value:s.wIn,autoFocus:true});
+    inp.addEventListener("input",e=>{s.wIn=e.target.value;});
+    inp.addEventListener("keydown",e=>{if(e.key==="Enter"&&!s.wAns&&s.wIn.trim()){s.wOk=checkAns(word[aK()],s.wIn);s.wAns=true;if(s.wOk)s.wScore++;else s.wWrong.push(word);render();}});
+    d.append(inp);
+
+    if(!s.wAns){
+      d.append(h("div",{style:{display:"flex",gap:"10px"}},
+        goldBtn("Valider",()=>{if(!s.wIn.trim())return;s.wOk=checkAns(word[aK()],s.wIn);s.wAns=true;if(s.wOk)s.wScore++;else s.wWrong.push(word);render();},{flex:"1"}),
+        dimBtn("Passer",()=>{s.wAns=true;s.wOk=false;s.wWrong.push(word);render();})
+      ));
+    } else {
+      d.append(h("div",{className:"fadeUp"},
+        h("div",{style:{padding:"14px",borderRadius:"14px",marginBottom:"10px",background:s.wOk?"rgba(74,222,128,0.06)":"rgba(239,68,68,0.06)",border:"1px solid "+(s.wOk?"rgba(74,222,128,0.3)":"rgba(239,68,68,0.3)")}},
+          h("div",{style:{fontSize:"13px",fontWeight:"600",color:s.wOk?"#4ade80":"#ef4444",marginBottom:"4px"}},s.wOk?"Correct !":"Incorrect"),
+          h("div",{style:{...aSt(),fontSize:s.dir!=="ar-fr"?"26px":"16px"}},word[aK()])
+        ),
+        goldBtn(s.wIdx+1<s.wQ.length?"Suivant →":s.wWrong.length>0&&s.wRound<3?"Tour suivant (ratés)":"Terminer",()=>{
+          if(s.wIdx+1<s.wQ.length){s.wIdx++;s.wIn="";s.wAns=false;}
+          else if(s.wWrong.length>0&&s.wRound<3){s.wQ=shuf(s.wWrong);s.wIdx=0;s.wWrong=[];s.wRound++;s.wIn="";s.wAns=false;}
+          else s.wDone=true;
+          render();
+        },{width:"100%"})
+      ));
+    }
+  } else {
+    d.append(doneScreen(s.wScore>=s.wQ.length*0.8?"🌟":"💪",s.wScore+" correct"+(s.wScore>1?"s":""),"en "+s.wRound+" tour"+(s.wRound>1?"s":""),()=>initWrite(pool())));
+  }
+  return d;
+}
+
+// ═══════════════════════════════════════
+//  RESULTS
+// ═══════════════════════════════════════
+function renderResults(){
+  return doneScreen("🌟","Apprendre",state.lOk+"/"+state.lTotal+" — "+state.lRound+" tour"+(state.lRound>1?"s":""),()=>initLearn(pool()));
+}
+
+// ═══════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════
+loadProgress();
+render();
+
+// Register service worker
+if("serviceWorker" in navigator){navigator.serviceWorker.register("sw.js").catch(()=>{});}
+</script>
+</body>
+</html>
