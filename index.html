@@ -28,8 +28,8 @@ button{font-family:'DM Sans',sans-serif}
 button:disabled{opacity:.45;cursor:default!important}
 input:focus{outline:none;border-color:var(--gold)!important}
 @media(hover:hover){button:hover:not(:disabled){filter:brightness(1.12)}}
-/* Safe area padding for iPhone notch */
-.wrap{padding-bottom:calc(32px + env(safe-area-inset-bottom,0px))}
+/* Safe area padding for iPhone notch/Dynamic Island */
+.wrap{padding-top:calc(12px + env(safe-area-inset-top,0px));padding-bottom:calc(32px + env(safe-area-inset-bottom,0px))}
 /* Scrollbar */
 ::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:rgba(200,169,110,0.15);border-radius:2px}
 </style>
@@ -194,7 +194,7 @@ function render(){
 
 function renderScreen(){
   const s=state;
-  const wrap=h("div",{style:{width:"100%",maxWidth:460,padding:"12px 14px 32px",paddingBottom:"calc(32px + env(safe-area-inset-bottom, 0px))",position:"relative",zIndex:1}});
+  const wrap=h("div",{style:{width:"100%",maxWidth:460,padding:"12px 14px 32px",paddingTop:"calc(12px + env(safe-area-inset-top, 0px))",paddingBottom:"calc(32px + env(safe-area-inset-bottom, 0px))",position:"relative",zIndex:1}});
   wrap.className="wrap";
 
   if(s.screen==="home")wrap.append(renderHome());
