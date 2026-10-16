@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
 <meta name="apple-mobile-web-app-title" content="Kalimāt"/>
 <meta name="theme-color" content="#0d0f14"/>
-<meta name="description" content="100 mots les plus fréquents du Coran — 5 modes d'étude"/>
+<meta name="description" content="300 mots les plus fréquents du Coran — 5 modes d'étude"/>
 <title>Kalimāt — Vocabulaire Coranique</title>
 <link rel="manifest" href="manifest.json"/>
 <link rel="apple-touch-icon" href="icon-192.png"/>
@@ -28,16 +28,23 @@ button{font-family:'DM Sans',sans-serif}
 button:disabled{opacity:.45;cursor:default!important}
 input:focus{outline:none;border-color:var(--gold)!important}
 @media(hover:hover){button:hover:not(:disabled){filter:brightness(1.12)}}
-/* Safe area padding for iPhone notch/Dynamic Island */
+/* Safe area — iPhone notch/Dynamic Island */
 .wrap{padding-top:calc(12px + env(safe-area-inset-top,0px));padding-bottom:calc(32px + env(safe-area-inset-bottom,0px))}
 /* Scrollbar */
 ::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:rgba(200,169,110,0.15);border-radius:2px}
+/* ── Desktop ─────────────────────────────────────────── */
+@media(min-width:768px){
+  #app{align-items:flex-start;padding:20px;justify-content:center}
+  .desk-root{display:grid;grid-template-columns:252px 1fr;gap:16px;width:100%;max-width:1060px;align-items:flex-start}
+  .desk-nav{position:sticky;top:20px;height:calc(100dvh - 40px);overflow-y:auto;border-radius:16px;border:1px solid var(--border);background:rgba(255,255,255,0.018);padding:12px;display:flex;flex-direction:column;gap:4px}
+  .desk-nav::-webkit-scrollbar{width:3px}
+  .wrap{max-width:none;padding-top:12px;padding-bottom:24px;padding-left:0;padding-right:0}
+}
 </style>
 </head>
 <body>
 <div id="app"></div>
 
-<!-- Geometric BG SVG -->
 <svg style="position:fixed;inset:0;width:100%;height:100%;z-index:0;opacity:0.025;pointer-events:none">
 <defs><pattern id="gp" width="80" height="80" patternUnits="userSpaceOnUse">
 <path d="M40 0L80 40L40 80L0 40Z" fill="none" stroke="#c8a96e" stroke-width=".5"/>
@@ -48,7 +55,7 @@ input:focus{outline:none;border-color:var(--gold)!important}
 <script>
 // ═══════════════════════════════════════════════════════════
 //  KALIMĀT — Quran Vocabulary PWA
-//  100 most frequent Quran words, 5 study modes
+//  300 most frequent Quran words, 5 study modes
 // ═══════════════════════════════════════════════════════════
 
 const LOTS=[
@@ -75,18 +82,78 @@ const LOTS=[
 {ar:"عِلْمٌ",fr:"science / savoir"},{ar:"عَذَابٌ",fr:"châtiment"},{ar:"أَجْرٌ",fr:"récompense / salaire"},{ar:"رَحْمَةٌ",fr:"miséricorde"},{ar:"سَبِيلٌ",fr:"chemin / voie"}]},
 {id:8,title:"Foi & pratique",words:[
 {ar:"دِينٌ",fr:"religion"},{ar:"صَلَاةٌ",fr:"prière"},{ar:"إِيمَانٌ",fr:"foi"},{ar:"تَقْوَىٰ",fr:"piété / crainte d'Allah"},{ar:"صِرَاطٌ",fr:"voie droite"},
-{ar:"هُدًى",fr:"guidée / guidance"},{ar:"تَوْبَةٌ",fr:"repentir"},{ar:"ذَنْبٌ",fr:"péché"},{ar:"ظُلْمٌ",fr:"injustice"},{ar:"فِتْنَةٌ",fr:"épreuve / tentation"}]},
+{ar:"هُدًى",fr:"guidance"},{ar:"تَوْبَةٌ",fr:"repentir"},{ar:"ذَنْبٌ",fr:"péché"},{ar:"ظُلْمٌ",fr:"injustice"},{ar:"فِتْنَةٌ",fr:"épreuve / tentation"}]},
 {id:9,title:"Concepts clés",words:[
 {ar:"مَوْتٌ",fr:"mort"},{ar:"حَيَاةٌ",fr:"vie"},{ar:"دُنْيَا",fr:"bas monde / vie d'ici-bas"},{ar:"آخِرَةٌ",fr:"au-delà / vie dernière"},{ar:"رَسُولٌ",fr:"messager / envoyé"},
 {ar:"نَبِيٌّ",fr:"prophète"},{ar:"مَلَكٌ",fr:"ange"},{ar:"شَيْطَانٌ",fr:"diable / Satan"},{ar:"مُؤْمِنٌ",fr:"croyant"},{ar:"كَافِرٌ",fr:"mécréant"}]},
 {id:10,title:"Adjectifs & divers",words:[
 {ar:"عَظِيمٌ",fr:"immense / grandiose"},{ar:"كَبِيرٌ",fr:"grand"},{ar:"كَرِيمٌ",fr:"généreux / noble"},{ar:"مُبِينٌ",fr:"clair / évident"},{ar:"صَالِحٌ",fr:"pieux / vertueux"},
 {ar:"ثُمَّ",fr:"ensuite / puis"},{ar:"أَوْ",fr:"ou"},{ar:"بَلْ",fr:"plutôt / mais"},{ar:"لَعَلَّ",fr:"peut-être / afin que"},{ar:"كَيْفَ",fr:"comment"}]},
+{id:11,title:"Particules (2)",words:[
+{ar:"وَ",fr:"et"},{ar:"هَلْ",fr:"est-ce que ?"},{ar:"حَتَّىٰ",fr:"jusqu'à"},{ar:"عَنْ",fr:"de / au sujet de"},{ar:"مَعَ",fr:"avec / ensemble"},
+{ar:"بَعْدَ",fr:"après"},{ar:"قَبْلَ",fr:"avant"},{ar:"عِندَ",fr:"auprès de / chez"},{ar:"لَوْ",fr:"si / si seulement"},{ar:"لَمْ",fr:"ne…pas (passé)"}]},
+{id:12,title:"Repères & mesure",words:[
+{ar:"أَنَا",fr:"moi / je"},{ar:"أَنتَ",fr:"toi / tu (masc.)"},{ar:"مَنْ",fr:"qui / celui qui"},{ar:"كُلٌّ",fr:"tout / chaque"},{ar:"بَعْضٌ",fr:"certains / une partie"},
+{ar:"غَيْرٌ",fr:"autre / différent"},{ar:"مِثْلٌ",fr:"semblable / comme"},{ar:"إِذَا",fr:"lorsque / quand"},{ar:"إِذْ",fr:"quand (passé)"},{ar:"كُلَّمَا",fr:"chaque fois que"}]},
+{id:13,title:"Verbes (3)",words:[
+{ar:"أَخَذَ",fr:"il a pris"},{ar:"رَجَعَ",fr:"il est retourné"},{ar:"وَجَدَ",fr:"il a trouvé"},{ar:"نَزَلَ",fr:"il est descendu"},{ar:"فَتَحَ",fr:"il a ouvert"},
+{ar:"أَمَرَ",fr:"il a ordonné"},{ar:"وَعَدَ",fr:"il a promis"},{ar:"خَافَ",fr:"il a craint"},{ar:"أَحَبَّ",fr:"il a aimé"},{ar:"غَفَرَ",fr:"il a pardonné"}]},
+{id:14,title:"Verbes (4)",words:[
+{ar:"صَبَرَ",fr:"il a été patient"},{ar:"شَكَرَ",fr:"il a remercié"},{ar:"أَنذَرَ",fr:"il a averti"},{ar:"بَشَّرَ",fr:"il a annoncé une bonne nouvelle"},{ar:"نَصَرَ",fr:"il a secouru"},
+{ar:"أَقَامَ",fr:"il a établi"},{ar:"قَضَىٰ",fr:"il a décidé / accompli"},{ar:"اتَّبَعَ",fr:"il a suivi"},{ar:"أَفْلَحَ",fr:"il a réussi"},{ar:"اصْطَفَىٰ",fr:"il a élu / choisi"}]},
+{id:15,title:"Temps & durée",words:[
+{ar:"لَيْلٌ",fr:"nuit"},{ar:"نَهَارٌ",fr:"jour / journée"},{ar:"وَقْتٌ",fr:"temps / moment"},{ar:"سَاعَةٌ",fr:"heure / Heure [du Jugement]"},{ar:"أَجَلٌ",fr:"terme fixé"},
+{ar:"حِينٌ",fr:"moment / instant"},{ar:"شَهْرٌ",fr:"mois"},{ar:"سَنَةٌ",fr:"année"},{ar:"بُكْرَةٌ",fr:"matin / aurore"},{ar:"أَصِيلٌ",fr:"soir / déclin"}]},
+{id:16,title:"Famille & liens",words:[
+{ar:"أَبٌ",fr:"père"},{ar:"أُمٌّ",fr:"mère"},{ar:"ابْنٌ",fr:"fils"},{ar:"أَخٌ",fr:"frère"},{ar:"زَوْجٌ",fr:"époux / couple"},
+{ar:"وَلَدٌ",fr:"enfant / fils"},{ar:"أَهْلٌ",fr:"famille / proches"},{ar:"وَالِدٌ",fr:"père / géniteur"},{ar:"ذُرِّيَّةٌ",fr:"descendance / progéniture"},{ar:"عَدُوٌّ",fr:"ennemi"}]},
+{id:17,title:"Corps humain",words:[
+{ar:"يَدٌ",fr:"main"},{ar:"عَيْنٌ",fr:"œil / source"},{ar:"وَجْهٌ",fr:"visage"},{ar:"لِسَانٌ",fr:"langue / parole"},{ar:"صَدْرٌ",fr:"poitrine / sein"},
+{ar:"رَأْسٌ",fr:"tête"},{ar:"قَدَمٌ",fr:"pied"},{ar:"ظَهْرٌ",fr:"dos"},{ar:"بَطْنٌ",fr:"ventre"},{ar:"رُوحٌ",fr:"esprit / souffle divin"}]},
+{id:18,title:"Attributs divins (2)",words:[
+{ar:"الْمَلِكُ",fr:"Le Roi / Souverain"},{ar:"الْقُدُّوسُ",fr:"Le Très Saint"},{ar:"الْغَنِيُّ",fr:"L'Indépendant / Le Riche"},{ar:"الْوَكِيلُ",fr:"Le Garant"},{ar:"الشَّهِيدُ",fr:"Le Témoin"},
+{ar:"الرَّقِيبُ",fr:"Le Surveillant"},{ar:"الْوَدُودُ",fr:"Le Très Aimant"},{ar:"الصَّمَدُ",fr:"L'Impénétrable"},{ar:"الْأَحَدُ",fr:"L'Unique"},{ar:"الْحَمِيدُ",fr:"Le Digne de louange"}]},
+{id:19,title:"Eschatologie",words:[
+{ar:"قِيَامَةٌ",fr:"Résurrection / Jugement Dernier"},{ar:"جَهَنَّمُ",fr:"Géhenne / Enfer"},{ar:"حِسَابٌ",fr:"compte / jugement"},{ar:"مِيزَانٌ",fr:"balance"},{ar:"جَزَاءٌ",fr:"rétribution / récompense"},
+{ar:"غَيْبٌ",fr:"l'invisible / l'insondable"},{ar:"شَفَاعَةٌ",fr:"intercession"},{ar:"لِقَاءٌ",fr:"rencontre [avec Dieu]"},{ar:"خُلُودٌ",fr:"éternité"},{ar:"بَعْثٌ",fr:"résurrection"}]},
+{id:20,title:"Profils humains",words:[
+{ar:"صَادِقٌ",fr:"véridique / sincère"},{ar:"كَاذِبٌ",fr:"menteur"},{ar:"مُنَافِقٌ",fr:"hypocrite"},{ar:"مُشْرِكٌ",fr:"polythéiste"},{ar:"مُتَّقٍ",fr:"pieux / craignant-Dieu"},
+{ar:"صَابِرٌ",fr:"patient"},{ar:"شَاكِرٌ",fr:"reconnaissant"},{ar:"مُحْسِنٌ",fr:"bienfaisant"},{ar:"فَاسِقٌ",fr:"pervers / impie"},{ar:"ظَالِمٌ",fr:"injuste / oppresseur"}]},
+{id:21,title:"Nature & cosmos",words:[
+{ar:"شَمْسٌ",fr:"soleil"},{ar:"قَمَرٌ",fr:"lune"},{ar:"نَجْمٌ",fr:"étoile"},{ar:"رِيحٌ",fr:"vent"},{ar:"مَطَرٌ",fr:"pluie"},
+{ar:"بَحْرٌ",fr:"mer"},{ar:"نَهَرٌ",fr:"fleuve / rivière"},{ar:"جَبَلٌ",fr:"montagne"},{ar:"شَجَرَةٌ",fr:"arbre"},{ar:"تُرَابٌ",fr:"poussière / terre"}]},
+{id:22,title:"Verbes (5)",words:[
+{ar:"سَمِعَ",fr:"il a entendu"},{ar:"كَتَبَ",fr:"il a écrit"},{ar:"قَتَلَ",fr:"il a tué"},{ar:"نَسِيَ",fr:"il a oublié"},{ar:"عَبَدَ",fr:"il a adoré"},
+{ar:"حَكَمَ",fr:"il a jugé"},{ar:"أَصْلَحَ",fr:"il a réformé / amélioré"},{ar:"سَبَّحَ",fr:"il a glorifié"},{ar:"حَمِدَ",fr:"il a loué"},{ar:"جَاهَدَ",fr:"il a lutté / fait effort"}]},
+{id:23,title:"Verbes (6)",words:[
+{ar:"أَعْطَىٰ",fr:"il a donné"},{ar:"مَنَعَ",fr:"il a empêché"},{ar:"عَصَىٰ",fr:"il a désobéi"},{ar:"أَطَاعَ",fr:"il a obéi"},{ar:"كَسَبَ",fr:"il a acquis / gagné"},
+{ar:"تَوَكَّلَ",fr:"il s'est confié à Dieu"},{ar:"رَضِيَ",fr:"il a agréé / accepté"},{ar:"اسْتَعَانَ",fr:"il a demandé de l'aide"},{ar:"اسْتَغْفَرَ",fr:"il a demandé pardon"},{ar:"اسْتَجَابَ",fr:"il a répondu / exaucé"}]},
+{id:24,title:"Valeurs morales",words:[
+{ar:"عَدْلٌ",fr:"justice"},{ar:"صِدْقٌ",fr:"vérité / sincérité"},{ar:"أَمَانَةٌ",fr:"confiance / fidélité"},{ar:"إِحْسَانٌ",fr:"bienfaisance / excellence"},{ar:"بِرٌّ",fr:"bonté / piété"},
+{ar:"فَسَادٌ",fr:"corruption / désordre"},{ar:"بَاطِلٌ",fr:"faux / vain"},{ar:"حَرَامٌ",fr:"interdit / sacré"},{ar:"حَلَالٌ",fr:"licite / permis"},{ar:"مَعْرُوفٌ",fr:"bien / ce qui est convenable"}]},
+{id:25,title:"Lieu & espace",words:[
+{ar:"بَيْتٌ",fr:"maison"},{ar:"مَسْجِدٌ",fr:"mosquée"},{ar:"مَدِينَةٌ",fr:"ville"},{ar:"قَرْيَةٌ",fr:"village / cité"},{ar:"بَابٌ",fr:"porte"},
+{ar:"مَكَانٌ",fr:"endroit / lieu"},{ar:"طَرِيقٌ",fr:"chemin / route"},{ar:"بَلَدٌ",fr:"pays / cité"},{ar:"وَادٍ",fr:"vallée"},{ar:"بَرٌّ",fr:"terre ferme / continent"}]},
+{id:26,title:"Vie intérieure",words:[
+{ar:"يَقِينٌ",fr:"certitude"},{ar:"خُشُوعٌ",fr:"recueillement / humilité"},{ar:"إِخْلَاصٌ",fr:"sincérité / dévotion pure"},{ar:"خَوْفٌ",fr:"crainte / peur"},{ar:"رَجَاءٌ",fr:"espoir / espérance"},
+{ar:"حُبٌّ",fr:"amour"},{ar:"تَوَكُّلٌ",fr:"confiance en Dieu"},{ar:"رِضَاءٌ",fr:"agrément / satisfaction"},{ar:"شُكْرٌ",fr:"reconnaissance / gratitude"},{ar:"صَبْرٌ",fr:"patience"}]},
+{id:27,title:"Prophètes & figures",words:[
+{ar:"مُوسَىٰ",fr:"Moïse"},{ar:"عِيسَىٰ",fr:"Jésus"},{ar:"إِبْرَاهِيمُ",fr:"Abraham"},{ar:"نُوحٌ",fr:"Noé"},{ar:"آدَمُ",fr:"Adam"},
+{ar:"يُوسُفُ",fr:"Joseph"},{ar:"سُلَيْمَانُ",fr:"Salomon"},{ar:"دَاوُودُ",fr:"David"},{ar:"إِسْمَاعِيلُ",fr:"Ismaël"},{ar:"مُحَمَّدٌ",fr:"Muhammad"}]},
+{id:28,title:"Textes & révélation",words:[
+{ar:"قُرْآنٌ",fr:"Coran"},{ar:"أُمَّةٌ",fr:"communauté / nation"},{ar:"وَحْيٌ",fr:"révélation"},{ar:"ذِكْرٌ",fr:"rappel / mention"},{ar:"فُرْقَانٌ",fr:"critère / discernement"},
+{ar:"تَوْرَاةٌ",fr:"Torah"},{ar:"إِنْجِيلٌ",fr:"Évangile"},{ar:"مِلَّةٌ",fr:"religion / confession"},{ar:"خَلِيفَةٌ",fr:"calife / successeur"},{ar:"صُحُفٌ",fr:"feuillets / Écritures"}]},
+{id:29,title:"Actes d'adoration",words:[
+{ar:"صَلَّىٰ",fr:"il a prié"},{ar:"صَامَ",fr:"il a jeûné"},{ar:"حَجَّ",fr:"il a fait le pèlerinage"},{ar:"سَجَدَ",fr:"il s'est prosterné"},{ar:"رَكَعَ",fr:"il s'est incliné"},
+{ar:"تَلَا",fr:"il a récité"},{ar:"تَدَبَّرَ",fr:"il a médité"},{ar:"تَطَهَّرَ",fr:"il s'est purifié"},{ar:"زَكَّىٰ",fr:"il a donné la zakāt / purifié"},{ar:"أَنْفَقَ",fr:"il a dépensé pour Dieu"}]},
+{id:30,title:"Grâces & épreuves",words:[
+{ar:"نِعْمَةٌ",fr:"bienfait / grâce"},{ar:"فَضْلٌ",fr:"faveur / grâce divine"},{ar:"رِزْقٌ",fr:"subsistance / provision"},{ar:"بَرَكَةٌ",fr:"bénédiction"},{ar:"حَسَنَةٌ",fr:"bonne action / bienfait"},
+{ar:"سَيِّئَةٌ",fr:"mauvaise action / méfait"},{ar:"مُصِيبَةٌ",fr:"malheur / calamité"},{ar:"بَلَاءٌ",fr:"épreuve / affliction"},{ar:"أَمْرٌ",fr:"ordre / affaire"},{ar:"حُكْمٌ",fr:"jugement / décision divine"}]},
 ];
 
 const ALL=LOTS.flatMap(l=>l.words);
 const shuf=a=>{const b=[...a];for(let i=b.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[b[i],b[j]]=[b[j],b[i]];}return b;};
-const norm=s=>s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^\w\s]/g,"").trim();
+const norm=s=>s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/[^\w\s]/g,"").trim();
 const checkAns=(correct,given)=>{const c=norm(correct),g=norm(given),m=c.split("/")[0].trim();return g&&(c.includes(g)||g.includes(m));};
 
 // ═══════════════════════════════════════
@@ -94,15 +161,10 @@ const checkAns=(correct,given)=>{const c=norm(correct),g=norm(given),m=c.split("
 // ═══════════════════════════════════════
 let state={
   screen:"home",lot:null,dir:"ar-fr",stars:new Set(),
-  // Cartes
   cCards:[],cIdx:0,cFlip:false,cKnown:0,cLearn:0,cDone:false,
-  // Apprendre
   lQ:[],lIdx:0,lType:"mcq",lChoices:[],lTf:null,lPicked:null,lAns:false,lInput:"",lOk:0,lWrong:[],lRound:1,lTotal:0,
-  // Test
   tQs:[],tAns:{},tSub:false,tScore:0,
-  // Match
   mPairs:[],mSel:null,mMatched:new Set(),mWrong:null,mTime:0,mRun:false,mDone:false,
-  // Write
   wQ:[],wIdx:0,wIn:"",wAns:false,wOk:false,wScore:0,wWrong:[],wRound:1,wDone:false,
 };
 let mTimer=null;
@@ -113,20 +175,13 @@ const pool=()=>state.lot?LOTS.find(l=>l.id===state.lot).words:ALL;
 function setState(u){Object.assign(state,typeof u==="function"?u(state):u);render();}
 
 // ═══════════════════════════════════════
-//  Save/Load progress from localStorage
+//  Save/Load progress
 // ═══════════════════════════════════════
 function saveProgress(){
-  try{
-    const d={stars:[...state.stars],dir:state.dir};
-    localStorage.setItem("kalimat_v1",JSON.stringify(d));
-  }catch(e){}
+  try{localStorage.setItem("kalimat_v1",JSON.stringify({stars:[...state.stars],dir:state.dir}));}catch(e){}
 }
 function loadProgress(){
-  try{
-    const d=JSON.parse(localStorage.getItem("kalimat_v1")||"{}");
-    if(d.stars)state.stars=new Set(d.stars);
-    if(d.dir)state.dir=d.dir;
-  }catch(e){}
+  try{const d=JSON.parse(localStorage.getItem("kalimat_v1")||"{}");if(d.stars)state.stars=new Set(d.stars);if(d.dir)state.dir=d.dir;}catch(e){}
 }
 
 // ═══════════════════════════════════════
@@ -175,7 +230,7 @@ function h(tag,attrs,...children){
     if(k==="style"&&typeof v==="object")Object.assign(el.style,v);
     else if(k.startsWith("on"))el.addEventListener(k.slice(2).toLowerCase(),v);
     else if(k==="className")el.className=v;
-    else if(k==="disabled"){if(v)el.setAttribute("disabled","");} 
+    else if(k==="disabled"){if(v)el.setAttribute("disabled","");}
     else if(k==="placeholder")el.setAttribute("placeholder",v);
     else if(k==="value")el.value=v;
     else if(k==="autoFocus")setTimeout(()=>el.focus(),50);
@@ -187,14 +242,18 @@ function h(tag,attrs,...children){
 
 function render(){
   const app=document.getElementById("app");
-  const n=renderScreen();
   app.innerHTML="";
-  app.append(n);
+  app.append(renderScreen());
 }
+
+const isDesk=()=>window.innerWidth>=768;
 
 function renderScreen(){
   const s=state;
-  const wrap=h("div",{style:{width:"100%",maxWidth:460,padding:"12px 14px 32px",paddingTop:"calc(12px + env(safe-area-inset-top, 0px))",paddingBottom:"calc(32px + env(safe-area-inset-bottom, 0px))",position:"relative",zIndex:1}});
+  const wrap=h("div",{style:{width:"100%",maxWidth:isDesk()?"none":460,padding:"12px 14px 32px",
+    paddingTop:"calc(12px + env(safe-area-inset-top, 0px))",
+    paddingBottom:"calc(32px + env(safe-area-inset-bottom, 0px))",
+    position:"relative",zIndex:1}});
   wrap.className="wrap";
 
   if(s.screen==="home")wrap.append(renderHome());
@@ -204,7 +263,51 @@ function renderScreen(){
   else if(s.screen==="match")wrap.append(renderMatch());
   else if(s.screen==="ecrire")wrap.append(renderWrite());
   else if(s.screen==="results")wrap.append(renderResults());
+
+  if(isDesk()){
+    const root=h("div");root.className="desk-root";
+    root.append(renderDesktopNav(),wrap);
+    return root;
+  }
   return wrap;
+}
+
+// ═══════════════════════════════════════
+//  Desktop sidebar
+// ═══════════════════════════════════════
+function renderDesktopNav(){
+  const s=state;
+  const nav=h("div");nav.className="desk-nav";
+
+  nav.append(h("div",{style:{textAlign:"center",padding:"6px 0 12px",borderBottom:"1px solid var(--border)",marginBottom:"6px",cursor:"pointer"},onClick:goHome},
+    h("div",{style:{fontFamily:"'Amiri',serif",fontSize:"26px",color:"var(--cream)"}},"كَلِمَات"),
+    h("div",{style:{fontSize:"9px",letterSpacing:"2px",color:"var(--gold)",textTransform:"uppercase",marginTop:"2px"}},"Vocabulaire Coranique")
+  ));
+
+  const togRow=h("div",{style:{display:"flex",background:"var(--card)",borderRadius:"10px",padding:"2px",border:"1px solid var(--border)",marginBottom:"8px"}});
+  ["ar-fr","fr-ar"].forEach(d2=>{
+    const active=s.dir===d2;
+    togRow.append(h("button",{style:{flex:"1",padding:"7px 0",border:"none",borderRadius:"8px",background:active?"rgba(200,169,110,0.12)":"transparent",color:active?"var(--gold)":"var(--muted)",fontSize:"12px",fontWeight:"500",cursor:"pointer",transition:"all .2s"},onClick:()=>{setState({dir:d2});saveProgress();}},d2==="ar-fr"?"عربي → FR":"FR → عربي"));
+  });
+  nav.append(togRow);
+
+  nav.append(h("div",{style:{fontSize:"9px",color:"var(--muted)",letterSpacing:"1.5px",textTransform:"uppercase",padding:"2px 4px 4px"}},"Tout (300 mots)"));
+  [{m:"cartes",i:"📇",l:"Cartes"},{m:"apprendre",i:"🧠",l:"Apprendre"},{m:"test",i:"📝",l:"Test"},{m:"match",i:"🔗",l:"Associer"},{m:"ecrire",i:"✍️",l:"Écrire"}].forEach(({m,i,l})=>{
+    nav.append(h("button",{style:{width:"100%",padding:"8px 10px",border:"1px solid var(--border)",borderRadius:"10px",background:"var(--card)",color:"var(--cream)",fontSize:"13px",fontWeight:"500",cursor:"pointer",display:"flex",alignItems:"center",gap:"7px",transition:"all .2s",marginBottom:"3px"},onClick:()=>openMode(m,null)},h("span",null,i),l));
+  });
+
+  nav.append(h("div",{style:{fontSize:"9px",color:"var(--muted)",letterSpacing:"1.5px",textTransform:"uppercase",padding:"8px 4px 4px",borderTop:"1px solid var(--border)",marginTop:"4px"}},"Par lot de 10"));
+  LOTS.forEach(lot=>{
+    const active=s.lot===lot.id&&s.screen!=="home";
+    const row=h("div",{style:{display:"flex",alignItems:"center",gap:"6px",padding:"5px 8px",borderRadius:"9px",background:active?"rgba(200,169,110,0.08)":"transparent",border:"1px solid "+(active?"rgba(200,169,110,0.2)":"transparent"),cursor:"pointer",transition:"all .15s"},onClick:()=>openMode("cartes",lot.id)});
+    row.append(
+      h("span",{style:{fontSize:"10px",color:"var(--gold)",fontWeight:"700",minWidth:"20px",fontVariantNumeric:"tabular-nums"}},(lot.id<10?"0":"")+lot.id),
+      h("span",{style:{fontSize:"12px",color:active?"var(--cream)":"var(--muted)",flex:"1",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}},lot.title)
+    );
+    nav.append(row);
+  });
+
+  return nav;
 }
 
 const qSt=()=>state.dir==="ar-fr"?{fontFamily:"'Amiri',serif",fontSize:"40px",direction:"rtl",lineHeight:"1.5",color:"var(--cream)",textAlign:"center"}
@@ -214,20 +317,7 @@ const aSt=()=>state.dir==="ar-fr"?{fontFamily:"'DM Sans',sans-serif",fontSize:"1
 const arChoiceSt=()=>state.dir!=="ar-fr"?{fontFamily:"'Amiri',serif",fontSize:"22px",direction:"rtl"}:{};
 const arInputSt=()=>state.dir!=="ar-fr"?{direction:"rtl",fontFamily:"'Amiri',serif",fontSize:"22px"}:{};
 
-// Shared styles
-const S={
-  btn:"width:100%;padding:13px 20px;border:1px solid var(--border);border-radius:14px;background:var(--card);color:var(--cream);font-size:15px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:all .2s",
-  bGo:"border-color:var(--gold);background:rgba(200,169,110,0.1);color:var(--gold)",
-  bDim:"border-color:var(--border);color:var(--muted)",
-  bGr:"border-color:#4ade80;background:rgba(74,222,128,0.1);color:#4ade80",
-  bOr:"border-color:#f97316;background:rgba(249,115,22,0.1);color:#f97316",
-};
-
-function css(base,...extras){return base+";"+extras.join(";")}
-function btn(text,onclick,extra=""){
-  const b=h("button",{style:Object.assign({},...css(S.btn,extra).split(";").map(s=>{const[k,v]=s.split(":").map(x=>x.trim());return k&&v?{[k.replace(/-([a-z])/g,(_,l)=>l.toUpperCase())]:v}:{};}))},text);
-  if(onclick)b.addEventListener("click",onclick);return b;
-}
+const S={btn:"width:100%;padding:13px 20px;border:1px solid var(--border);border-radius:14px;background:var(--card);color:var(--cream);font-size:15px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:all .2s"};
 
 function makeBtn(text,onClick,styles={}){
   const base={width:"100%",padding:"13px 20px",border:"1px solid var(--border)",borderRadius:"14px",background:"var(--card)",color:"var(--cream)",fontSize:"15px",fontWeight:"600",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:"8px",transition:"all .2s"};
@@ -250,8 +340,8 @@ function topBar(label,sub,progress){
   );
 }
 
-function doneScreen(emoji,title,sub,retryFn,label){
-  const d=h("div",{className:"fadeUp",style:{textAlign:"center",padding:"30px 0"}},
+function doneScreen(emoji,title,sub,retryFn){
+  return h("div",{className:"fadeUp",style:{textAlign:"center",padding:"30px 0"}},
     h("div",{style:{fontSize:"50px",marginBottom:"10px"}},emoji),
     h("div",{style:{fontSize:"22px",fontWeight:"700",color:"var(--cream)"}},title),
     h("div",{style:{color:"var(--muted)",fontSize:"14px",marginTop:"4px"}},sub),
@@ -260,45 +350,51 @@ function doneScreen(emoji,title,sub,retryFn,label){
       dimBtn("Accueil",goHome,{flex:"1"})
     )
   );
-  return d;
 }
 
 // ═══════════════════════════════════════
 //  HOME
 // ═══════════════════════════════════════
 function renderHome(){
-  const s=state,d=h("div",{className:"fadeUp",style:{display:"flex",flexDirection:"column",gap:"18px"}});
-  // Header
-  d.append(h("div",{style:{textAlign:"center",padding:"6px 0 0"}},
-    h("div",{style:{fontSize:"11px",letterSpacing:"3px",color:"var(--gold)",textTransform:"uppercase",fontWeight:"500"}},"Vocabulaire Coranique"),
-    h("h1",{style:{fontFamily:"'Amiri',serif",fontSize:"42px",color:"var(--cream)",margin:"2px 0",lineHeight:"1.2"}},"كَلِمَات"),
-    h("p",{style:{color:"var(--muted)",fontSize:"13px",margin:"0"}},"100 mots · 10 lots · 5 modes d'étude")
-  ));
-  // Toggle
-  const togRow=h("div",{style:{display:"flex",background:"var(--card)",borderRadius:"12px",padding:"3px",border:"1px solid var(--border)"}});
-  ["ar-fr","fr-ar"].forEach(d2=>{
-    const active=s.dir===d2;
-    togRow.append(h("button",{style:{flex:"1",padding:"9px 0",border:"none",borderRadius:"10px",background:active?"rgba(200,169,110,0.12)":"transparent",color:active?"var(--gold)":"var(--muted)",fontSize:"14px",fontWeight:"500",cursor:"pointer",transition:"all .2s"},onClick:()=>{setState({dir:d2});saveProgress();}},d2==="ar-fr"?"عربي → FR":"FR → عربي"));
-  });
-  d.append(togRow);
-  // Mode buttons
+  const s=state,desk=isDesk(),d=h("div",{className:"fadeUp",style:{display:"flex",flexDirection:"column",gap:"18px"}});
+
+  if(!desk){
+    d.append(h("div",{style:{textAlign:"center",padding:"6px 0 0"}},
+      h("div",{style:{fontSize:"11px",letterSpacing:"3px",color:"var(--gold)",textTransform:"uppercase",fontWeight:"500"}},"Vocabulaire Coranique"),
+      h("h1",{style:{fontFamily:"'Amiri',serif",fontSize:"42px",color:"var(--cream)",margin:"2px 0",lineHeight:"1.2"}},"كَلِمَات"),
+      h("p",{style:{color:"var(--muted)",fontSize:"13px",margin:"0"}},"300 mots · 30 lots · 5 modes d'étude")
+    ));
+    const togRow=h("div",{style:{display:"flex",background:"var(--card)",borderRadius:"12px",padding:"3px",border:"1px solid var(--border)"}});
+    ["ar-fr","fr-ar"].forEach(d2=>{
+      const active=s.dir===d2;
+      togRow.append(h("button",{style:{flex:"1",padding:"9px 0",border:"none",borderRadius:"10px",background:active?"rgba(200,169,110,0.12)":"transparent",color:active?"var(--gold)":"var(--muted)",fontSize:"14px",fontWeight:"500",cursor:"pointer",transition:"all .2s"},onClick:()=>{setState({dir:d2});saveProgress();}},d2==="ar-fr"?"عربي → FR":"FR → عربي"));
+    });
+    d.append(togRow);
+  } else {
+    d.append(h("div",{style:{padding:"4px 0 8px"}},
+      h("h2",{style:{fontFamily:"'Amiri',serif",fontSize:"32px",color:"var(--cream)",lineHeight:"1.2"}},"كَلِمَات"),
+      h("p",{style:{color:"var(--muted)",fontSize:"13px",marginTop:"4px"}},"300 mots · 30 lots · 5 modes d'étude")
+    ));
+  }
+
   const grid=h("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"8px"}});
   [{m:"cartes",i:"📇",l:"Cartes",span:true},{m:"apprendre",i:"🧠",l:"Apprendre"},{m:"test",i:"📝",l:"Test"},{m:"match",i:"🔗",l:"Associer"},{m:"ecrire",i:"✍️",l:"Écrire"}].forEach(({m,i,l,span})=>{
     const b=h("button",{style:{padding:"13px 16px",border:"1px solid var(--border)",borderRadius:"14px",background:"var(--card)",color:"var(--cream)",fontSize:"15px",fontWeight:"600",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:"8px",transition:"all .2s",...(span?{gridColumn:"1/3"}:{})},onClick:()=>openMode(m,null)},
       h("span",{style:{fontSize:"20px"}},i),l);
-    if(span)b.append(h("span",{style:{fontSize:"12px",color:"var(--muted)",marginLeft:"4px"}},"(100)"));
+    if(span)b.append(h("span",{style:{fontSize:"12px",color:"var(--muted)",marginLeft:"4px"}},"(300)"));
     grid.append(b);
   });
   d.append(grid);
-  // Separator
+
   d.append(h("div",{style:{display:"flex",alignItems:"center",gap:"12px",margin:"2px 0"}},
     h("div",{style:{flex:"1",height:"1px",background:"var(--border)"}}),
     h("span",{style:{color:"var(--muted)",fontSize:"11px",letterSpacing:"2px",textTransform:"uppercase"}},"Par lot de 10"),
     h("div",{style:{flex:"1",height:"1px",background:"var(--border)"}})
   ));
-  // Lots
+
+  const lotsGrid=h("div",{style:{display:"grid",gridTemplateColumns:desk?"1fr 1fr":"1fr",gap:"8px"}});
   LOTS.forEach((lot,idx)=>{
-    const card=h("div",{className:"fadeUp",style:{display:"flex",alignItems:"center",gap:"10px",padding:"12px",borderRadius:"14px",background:"var(--card)",border:"1px solid var(--border)",animationDelay:(idx*0.03)+"s"}},
+    const card=h("div",{className:"fadeUp",style:{display:"flex",alignItems:"center",gap:"10px",padding:"12px",borderRadius:"14px",background:"var(--card)",border:"1px solid var(--border)",animationDelay:(idx*0.02)+"s"}},
       h("div",{style:{flex:"1",minWidth:"0"}},
         h("div",{style:{fontSize:"14px",fontWeight:"600",color:"var(--cream)"}},"Lot "+lot.id+" — "+lot.title),
         h("div",{style:{fontSize:"12px",color:"var(--muted)",marginTop:"2px"}},lot.words.slice(0,3).map(w=>w.ar).join(" · ")+" …")
@@ -309,8 +405,9 @@ function renderHome(){
         )
       )
     );
-    d.append(card);
+    lotsGrid.append(card);
   });
+  d.append(lotsGrid);
   return d;
 }
 
@@ -321,17 +418,14 @@ function renderCartes(){
   const s=state,d=h("div",{className:"fadeUp",style:{display:"flex",flexDirection:"column",gap:"14px",alignItems:"center"}});
   d.append(topBar("Cartes"+(s.lot?" · Lot "+s.lot:""),s.cDone?"Terminé":(s.cIdx+1)+"/"+s.cCards.length,(s.cIdx+(s.cDone?1:0))/s.cCards.length));
   if(!s.cDone){
-    // Stats
     d.append(h("div",{style:{display:"flex",gap:"20px",justifyContent:"center"}},
       h("div",{style:{textAlign:"center"}},h("div",{style:{fontSize:"22px",fontWeight:"700",color:"#4ade80"}},s.cKnown),h("div",{style:{fontSize:"11px",color:"var(--muted)"}},"Acquis")),
       h("div",{style:{textAlign:"center"}},h("div",{style:{fontSize:"22px",fontWeight:"700",color:"#f97316"}},s.cLearn),h("div",{style:{fontSize:"11px",color:"var(--muted)"}},"À revoir"))
     ));
-    // Card
-    const card=h("div",{style:{width:"100%",maxWidth:"340px",height:"240px",perspective:"1000px",cursor:"pointer",WebkitTapHighlightColor:"transparent"},onClick:()=>setState({cFlip:!s.cFlip})});
+    const card=h("div",{style:{width:"100%",maxWidth:"380px",height:"240px",perspective:"1000px",cursor:"pointer",WebkitTapHighlightColor:"transparent"},onClick:()=>setState({cFlip:!s.cFlip})});
     card.className=s.cFlip?"cardFlipped":"";
     const inner=h("div",null);inner.className="cardInner";
     const word=s.cCards[s.cIdx];
-    // Front
     const front=h("div",null,
       h("button",{style:{position:"absolute",top:"12px",right:"12px",background:"none",border:"none",fontSize:"22px",color:"var(--gold)",cursor:"pointer",zIndex:"2"},onClick:e=>{e.stopPropagation();s.stars.has(word.ar)?s.stars.delete(word.ar):s.stars.add(word.ar);saveProgress();render();}},s.stars.has(word.ar)?"★":"☆"),
       h("div",{style:{fontSize:"11px",color:"var(--gold)",letterSpacing:"2px",textTransform:"uppercase",marginBottom:"6px"}},s.dir==="ar-fr"?"Arabe":"Français"),
@@ -343,9 +437,8 @@ function renderCartes(){
       h("div",{style:aSt()},word[aK()])
     );back.className="cardFace cardBack";
     inner.append(front,back);card.append(inner);d.append(card);
-    // Buttons
     if(s.cFlip){
-      d.append(h("div",{className:"fadeUp",style:{display:"flex",gap:"10px",width:"100%",maxWidth:"360px"}},
+      d.append(h("div",{className:"fadeUp",style:{display:"flex",gap:"10px",width:"100%",maxWidth:"380px"}},
         orangeBtn("À revoir 🔄",()=>{s.cLearn++;s.cFlip=false;setTimeout(()=>{if(s.cIdx+1<s.cCards.length)s.cIdx++;else s.cDone=true;render();},180);render();},{flex:"1"}),
         greenBtn("Acquis ✓",()=>{s.cKnown++;s.cFlip=false;setTimeout(()=>{if(s.cIdx+1<s.cCards.length)s.cIdx++;else s.cDone=true;render();},180);render();},{flex:"1"})
       ));
@@ -367,7 +460,6 @@ function renderLearn(){
     h("span",{style:{fontSize:"12px",padding:"2px 10px",borderRadius:"20px",background:"rgba(200,169,110,0.1)",color:"var(--gold)"}},s.lType==="mcq"?"QCM":s.lType==="tf"?"Vrai/Faux":"Écrit")
   ));
   const word=s.lQ[s.lIdx];
-  // Question
   const qc=h("div",{style:{padding:"22px 18px",borderRadius:"16px",background:"var(--card)",border:"1px solid var(--border)",textAlign:"center"}},h("div",{style:qSt()},word[qK()]));
   if(s.lType==="tf")qc.append(h("div",{style:{marginTop:"8px",fontSize:"16px",color:"var(--gold)"}},"= "+s.lTf[aK()]+" ?"));
   d.append(qc);
@@ -567,8 +659,7 @@ function renderResults(){
 // ═══════════════════════════════════════
 loadProgress();
 render();
-
-// Register service worker
+window.addEventListener("resize",render);
 if("serviceWorker" in navigator){navigator.serviceWorker.register("sw.js").catch(()=>{});}
 </script>
 </body>
